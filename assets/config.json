@@ -1,0 +1,49 @@
+{
+  "info": {
+    "title": "alertaccident",
+    "version": "1.0.0",
+    "license": {
+      "name": "ISC"
+    },
+    "description": "[Specification JSON](/api-spec)"
+  },
+  "paths": {
+    "/api/user": {
+      "get": {
+        "summary": "/api/user",
+        "consumes": ["application/json"],
+        "parameters": []
+      },
+      "post": {
+        "summary": "/api/user",
+        "consumes": ["application/json"],
+        "parameters": []
+      }
+    },
+    "/api/user/{id}": {
+      "get": {
+        "summary": "/api/user/{id}",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "summary": "/api/user/{id}",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "swagger": "2.0"
+}
