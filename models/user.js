@@ -1,11 +1,18 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
+//const Adress = require("./adress");
+const jwt = require("jsonwebtoken");
+const config = require("config");
+const _ = require("lodash");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   CIN: {
-    type: String,
+    //type: $or[objectId,String],
+    type:String,
     required: true,
-    length: 8
+    length: 8,
+    unique: true
   },
   nom: {
     type: String,
@@ -26,55 +33,60 @@ const userSchema = new mongoose.Schema({
     maxlength: 50,
     unique: true
   },
-  adresse: {
+  adress: {
     type: String,
-    required: false,
-    minlength: 10,
-    maxlength: 100,
-    unique: false
+    required: true,
+    minlength: 3,
+    maxlength: 100
   },
   telephone: {
     type: String,
     required: true,
-    minlength: 10,
+    minlength: 3,
     maxlength: 50,
     unique: false
   },
   photo: {
     type: String,
-    required: true
+    required: false
     //**********
   },
   permis: {
     type: String,
     required: true,
-    minlength: 11,
+    minlength: 3,
     maxlength: 30
   },
   password: {
     type: String,
     required: true,
-    minlength: 5,
-    maxlength: 20
+    minlength: 3,
+    maxlength: 255
   },
   nomUser: {
     type: String,
     required: true,
-    minlength: 5,
+    minlength: 3,
     maxlength: 50
   },
   agenceAssurance: {
-    type: String,
-    required: false,
-    minlength: 2,
-    maxlength: 50
+    enum: ["GAT", "STAR", "COMAR", "Maghrebia", "AMI"],
+    // default: "STAR",
+    required: false
   }
-  //ENUMERATION AGENCE + INSERT PHOTO + DECOMPOSITION ADRESSE
+  // INSERT PHOTO
 });
 
+userSchema.methods.generateAuthToken = function() {
+  const token = jwt.sign(
+    { _id: this._id, isAdmin: this.isAdmin },
+    config.get("jwtPrivateKey")
+  );
+  return token;
+};
 const User = mongoose.model("User", userSchema);
 
-function validateUser(user) {
+function validateUser(User) {
   const schema = {
     nom: Joi.string()
       .min(3)
@@ -82,6 +94,7 @@ function validateUser(user) {
       .required(),
     CIN: Joi.string()
       .length(8)
+      .unique()
       .required(),
     prenom: Joi.string()
       .min(3)
@@ -91,25 +104,26 @@ function validateUser(user) {
       .min(10)
       .max(50)
       .required()
+      .unique()
       .email(),
     adresse: Joi.string()
       .min(3)
-      .max(50),
+      .max(100),
     telephone: Joi.string()
-      .min(10)
+      .min(3)
       .max(50)
       .required(),
     //photo: Joi.,
     permis: Joi.string()
-      .min(11)
+      .min(3)
       .max(30)
       .required(),
     password: Joi.string()
-      .min(5)
-      .max(20)
+      .min(3)
+      .max(255)
       .required(),
     nomUser: Joi.string()
-      .min(5)
+      .min(3)
       .max(50)
       .required(),
     agenceAssurance: Joi.string()
@@ -117,10 +131,10 @@ function validateUser(user) {
       .max(50)
   };
 
-  return Joi.validate(user, schema);
+  return Joi.validate(User, schema);
 }
 
 /////////////////////////////// EXPORTED MODULES /////////////////////////
-exports.User = User;
-exports.validateUser = validateUser;
 module.exports = mongoose.model("User", userSchema);
+exports.User = User;
+exports.validate = validateUser;

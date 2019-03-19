@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^3.0.4",
+    "config": "^3.0.1",
     "express": "^4.16.4",
     "express-oas-generator": "^1.0.6",
     "joi": "^14.3.1",

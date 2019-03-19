@@ -1,6 +1,6 @@
 {
   "info": {
-    "title": "alertaccident",
+    "title": "alertacciden",
     "version": "1.0.0",
     "license": {
       "name": "ISC"
@@ -10,7 +10,7 @@
   "paths": {
     "/api/user": {
       "get": {
-        "summary": "/api/user",
+        "summary": "/api/user ******",
         "consumes": ["application/json"],
         "parameters": []
       },
