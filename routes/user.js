@@ -8,19 +8,40 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
 
+const bodyParser = require("body-parser");
+var expressValidator = require("express-validator");
+const { check } = require("express-validator/check");
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(expressValidator());
+
 ///////////////// GET ALL DATA ////////////////////////////
 router.get("/", async (req, res) => {
-  console.log("Getting data ...");
   const users = await User.find().sort("nom");
-  res.send(users);
+  if (users)
+    res.send({
+      status: "200",
+      message: "Opération efectuée avec sucée...",
+      users: users
+    });
   console.log(users);
+  if (!users)
+    res.send({ status: "400", message: "Aucun utilisateur trouvée..." });
 });
 
 //////////////// GET DATA BY ID /////////////////////
 router.get("/:id", async (req, res) => {
   const user = await User.findById(req.params.id);
-  if (!user) return res.status(404).send("Erreur : Identifiant introuvable...");
-  res.send(user);
+  if (user)
+    res.send({
+      status: "200",
+      message: "Opération efectuée avec sucée...",
+      user: user
+    });
+  if (!user)
+    return res.send({
+      status: "400",
+      message: "Aucun utilisateur trouvée..."
+    });
   console.log(user);
 });
 
@@ -28,7 +49,7 @@ router.get("/:id", async (req, res) => {
 
 console.log("procedding ...");
 router.get("/CIN/:CIN", async (req, res) => {
-  const user = await User.findById(req.params.CIN);
+  const user = await User.findOne(req.params.CIN);
   if (!user) return res.status(404).send("Erreur : Identifiant introuvable...");
   res.send(user);
   console.log(user);
@@ -36,34 +57,193 @@ router.get("/CIN/:CIN", async (req, res) => {
 });
 
 // /////////////////////////// POST DATA WITH HASHED PASSWORD ////////////////
-router.post("/", async (req, res) => {
-  console.log("posting ...");
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+router.post(
+  "/",
+  // [
+  //   check("nom")
+  //     .not()
+  //     .isEmpty()
+  //     .withMessage("Champ obligatoire")
+  //     .isAlpha()
+  //     .withMessage("Nom doit être une chaine des caractéres")
+  //     .isLength({ min: 3 }, { max: 50 })
+  //     .withMessage("Longeur de champ invalide "),
 
-  let user = await User.findOne({ email: req.body.email });
-  if (user) return res.status(400).send("Vous ete déjà enregistrer...");
+  //   check("prenom")
+  //     .not()
+  //     .isEmpty()
+  //     .withMessage("Champ obligatoire")
+  //     .isAlpha()
+  //     .withMessage("Prénom doit être une chaine des caractéres")
+  //     .isLength({ min: 3, max: 70 })
+  //     .withMessage("Longeur de champ invalide"),
 
-  user = new User(
-    _.pick(req.body, [
-      "nom",
-      "CIN",
-      "prenom",
-      "email",
-      "adress",
-      "telephone",
-      "permis",
-      "password",
-      "nomUser",
-      "agenceAssurance"
-    ])
-  );
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(user.password, salt);
-  await user.save();
-  res.send(user);
-  console.log(user);
-});
+  //   check("CIN")
+  //     .not()
+  //     .isEmpty()
+  //     .withMessage("Champ obligatoire")
+  //     .isAlphanumeric()
+  //     .withMessage("CIN doit être une suite des nombres")
+  //     .isLength({ min: 8, max: 8 })
+  //     .withMessage("Longeur du CIN doit être égale à 8"),
+
+  //   check("email")
+  //     .not()
+  //     .isEmpty()
+  //     .withMessage("Champ obligatoire")
+  //     .isEmail()
+  //     .withMessage("Format de email non respectée"),
+
+  //   check("adresse")
+  //     .isAlpha()
+  //     .withMessage("Adresse doit être une chaine des caractéres")
+  //     .isLength({ min: 3, max: 100 })
+  //     .withMessage(`Longeur d'adresse invalide`),
+
+  //   check("telephone")
+  //     .isAlphanumeric()
+  //     .withMessage("Telephone doit être une suite des nombres")
+  //     .isLength({ min: 5, max: 20 })
+  //     .withMessage(`Longeur du telephone invalide`),
+
+  //   check("permis")
+  //     .isAlphanumeric()
+  //     .withMessage("Chaine invalide")
+  //     .isLength({ min: 3, max: 30 })
+  //     .withMessage(`Longeur du permis invalide`),
+
+  //   // check("password")
+  //   //   .not()
+  //   //   .isEmpty()
+  //   //   .withMessage("Champ obligatoire")
+  //   //   .isAlphanumeric()
+  //   //   .withMessage("Chaine invalide")
+  //   //   .isLength({ min: 3, max: 255 })
+  //   //   .withMessage(`Longeur du mot de passe invalide`),
+
+  //   check("nomUser")
+  //     .not()
+  //     .isEmpty()
+  //     .withMessage("Champ obligatoire")
+  //     .isAlphanumeric()
+  //     .withMessage("Chaine invalide")
+  //     .isLength({ min: 3, max: 50 })
+  //     .withMessage(`Longeur du nom d'ultisateur invalide`),
+
+  //   check("agenceAssurance")
+  //     .isAlphanumeric()
+  //     .withMessage("Chaine invalide")
+  //     .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
+  //     .withMessage(`Agence d'assurance invalide`)
+  // ],
+  async (req, res) => {
+    console.log("req", req.body);
+
+    req.checkBody("nom", "name is required").notEmpty();
+    console.log("checking...");
+    req
+      .checkBody(req.body.nom)
+      .not()
+      .isEmpty()
+      .withMessage("Champ obligatoire")
+      .isAlpha()
+      .withMessage("Nom doit être une chaine des caractéres")
+      .isLength({ min: 3 }, { max: 50 })
+      .withMessage("Longeur de champ invalide "),
+      console.log("finishing...");
+    check("prenom")
+      .not()
+      .isEmpty()
+      .withMessage("Champ obligatoire")
+      .isAlpha()
+      .withMessage("Prénom doit être une chaine des caractéres")
+      .isLength({ min: 3, max: 70 })
+      .withMessage("Longeur de champ invalide"),
+      check("CIN")
+        .not()
+        .isEmpty()
+        .withMessage("Champ obligatoire")
+        .isAlphanumeric()
+        .withMessage("CIN doit être une suite des nombres")
+        .isLength({ min: 8, max: 8 })
+        .withMessage("Longeur du CIN doit être égale à 8"),
+      check("email")
+        .not()
+        .isEmpty()
+        .withMessage("Champ obligatoire")
+        .isEmail()
+        .withMessage("Format de email non respectée"),
+      check("adresse")
+        .isAlpha()
+        .withMessage("Adresse doit être une chaine des caractéres")
+        .isLength({ min: 3, max: 100 })
+        .withMessage(`Longeur d'adresse invalide`),
+      check("telephone")
+        .isAlphanumeric()
+        .withMessage("Telephone doit être une suite des nombres")
+        .isLength({ min: 5, max: 20 })
+        .withMessage(`Longeur du telephone invalide`),
+      check("permis")
+        .isAlphanumeric()
+        .withMessage("Chaine invalide")
+        .isLength({ min: 3, max: 30 })
+        .withMessage(`Longeur du permis invalide`),
+      // check("password")
+      //   .not()
+      //   .isEmpty()
+      //   .withMessage("Champ obligatoire")
+      //   .isAlphanumeric()
+      //   .withMessage("Chaine invalide")
+      //   .isLength({ min: 3, max: 255 })
+      //   .withMessage(`Longeur du mot de passe invalide`),
+
+      check("nomUser")
+        .not()
+        .isEmpty()
+        .withMessage("Champ obligatoire")
+        .isAlphanumeric()
+        .withMessage("Chaine invalide")
+        .isLength({ min: 3, max: 50 })
+        .withMessage(`Longeur du nom d'ultisateur invalide`),
+      check("agenceAssurance")
+        .isAlphanumeric()
+        .withMessage("Chaine invalide")
+        .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
+        .withMessage(`Agence d'assurance invalide`);
+
+    console.log("posting ...");
+    const nom = req.body.nom;
+    req.check(nom, "xxxxxxxxxxxxx").notEmpty();
+    // const  error  = req.checkBody("nom", "nom is required.").notEmpty();
+    console.log("err", req.checkBody(nom, "nom is required...").notEmpty());
+
+    if (error) return res.status(400).send(error.details[0].message);
+
+    let user = await User.findOne({ email: req.body.email });
+    if (user) return res.status(400).send("Vous ete déjà enregistrer...");
+
+    user = new User(
+      _.pick(req.body, [
+        "nom",
+        "CIN",
+        "prenom",
+        "email",
+        "adress",
+        "telephone",
+        "permis",
+        "password",
+        "nomUser",
+        "agenceAssurance"
+      ])
+    );
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt);
+
+    await user.save();
+    res.send(user);
+    console.log(user);
+  }
+);
 
 // const token = user.generateAuthToken();
 // res
@@ -80,7 +260,6 @@ router.delete("/:id", async (req, res) => {
       .send("Erreur lors de la suppression : Identiant introuvable ...");
   res.send(user);
   console.log("deleted with succes ...");
- 
 });
 
 /////////////////////// LOG OUT METHODE ////////////////////////////
@@ -113,3 +292,5 @@ router.delete("/:id", async (req, res) => {
 //   }
 // });
 module.exports = router;
+
+////////////////////////////// VALIDATOR IMAGE MESSAGE ERREUR RETOUR DE DONNEE//////

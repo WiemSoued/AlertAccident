@@ -3,12 +3,13 @@ const app = express();
 const expressOasGenerator = require("express-oas-generator");
 const mongoose = require("mongoose");
 const config = require("config");
+const bodyParser = require("body-parser");
+const expressValidator = require("express-validator");
 
 /////////////////////////////// EXPORTED MODULES //////////////////////
 
 const user = require("./routes/user");
 const admin = require("./routes/admin");
-//const adress = require("./routes/adress");
 const auth = require("./routes/auth");
 
 //////////////// SWAGGER CONFIGURATION ////////////////////////////////
@@ -26,9 +27,10 @@ mongoose
   .catch(err => console.error("Failed to connect to MongoDB..."));
 
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(expressValidator());
 app.use("/api/user", user);
 app.use("/api/admin", admin);
-//app.use("/api/adress", adress);
 app.use("/api/auth", auth);
 
 /////////////////// PORT CONFIGURATION ////////////////////////

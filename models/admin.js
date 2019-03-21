@@ -27,7 +27,6 @@ const adminSchema = new mongoose.Schema({
     required: true
     //**********
   },
-
   password: {
     type: String,
     required: true,
@@ -59,6 +58,7 @@ function validateAdmin(admin) {
       .min(10)
       .max(50)
       .required()
+      .unique()
       .email(),
     password: Joi.string()
       .min(5)

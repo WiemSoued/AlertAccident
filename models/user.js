@@ -1,4 +1,4 @@
-const Joi = require("joi");
+//const Joi = require("joi");
 const mongoose = require("mongoose");
 //const Adress = require("./adress");
 const jwt = require("jsonwebtoken");
@@ -9,7 +9,7 @@ const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema({
   CIN: {
     //type: $or[objectId,String],
-    type:String,
+    type: String,
     required: true,
     length: 8,
     unique: true
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
   },
   telephone: {
     type: String,
-    required: true,
+    //required: true,
     minlength: 3,
     maxlength: 50,
     unique: false
@@ -77,64 +77,64 @@ const userSchema = new mongoose.Schema({
   // INSERT PHOTO
 });
 
-userSchema.methods.generateAuthToken = function() {
-  const token = jwt.sign(
-    { _id: this._id, isAdmin: this.isAdmin },
-    config.get("jwtPrivateKey")
-  );
-  return token;
-};
+// userSchema.methods.generateAuthToken = function() {
+//   const token = jwt.sign(
+//     { _id: this._id, isAdmin: this.isAdmin },
+//     config.get("jwtPrivateKey")
+//   );
+//   return token;
+// };
 const User = mongoose.model("User", userSchema);
 
-function validateUser(User) {
-  const schema = {
-    nom: Joi.string()
-      .min(3)
-      .max(50)
-      .required(),
-    CIN: Joi.string()
-      .length(8)
-      .unique()
-      .required(),
-    prenom: Joi.string()
-      .min(3)
-      .max(70)
-      .required(),
-    email: Joi.string()
-      .min(10)
-      .max(50)
-      .required()
-      .unique()
-      .email(),
-    adresse: Joi.string()
-      .min(3)
-      .max(100),
-    telephone: Joi.string()
-      .min(3)
-      .max(50)
-      .required(),
-    //photo: Joi.,
-    permis: Joi.string()
-      .min(3)
-      .max(30)
-      .required(),
-    password: Joi.string()
-      .min(3)
-      .max(255)
-      .required(),
-    nomUser: Joi.string()
-      .min(3)
-      .max(50)
-      .required(),
-    agenceAssurance: Joi.string()
-      .min(2)
-      .max(50)
-  };
+// function validateUser(User) {
+//   const schema = {
+//     nom: Joi.string()
+//       .min(3)
+//       .max(50)
+//       .required(),
+//     CIN: Joi.string()
+//       .length(8)
+//       .unique()
+//       .required(),
+//     prenom: Joi.string()
+//       .min(3)
+//       .max(70)
+//       .required(),
+//     email: Joi.string()
+//       .min(10)
+//       .max(50)
+//       .required()
+//       .unique()
+//       .email(),
+//     adresse: Joi.string()
+//       .min(3)
+//       .max(100),
+//     telephone: Joi.string()
+//       .min(3)
+//       .max(50),
+//     // .required(),
+//     //photo: Joi.
+//     permis: Joi.string()
+//       .min(3)
+//       .max(30)
+//       .required(),
+//     password: Joi.string()
+//       .min(3)
+//       .max(255)
+//       .required(),
+//     nomUser: Joi.string()
+//       .min(3)
+//       .max(50)
+//       .required(),
+//     agenceAssurance: Joi.string()
+//       .min(2)
+//       .max(50)
+//   };
 
-  return Joi.validate(User, schema);
-}
+//   return Joi.validate(User, schema);
+// }
 
 /////////////////////////////// EXPORTED MODULES /////////////////////////
 module.exports = mongoose.model("User", userSchema);
 exports.User = User;
-exports.validate = validateUser;
+// exports.validate = validateUser;
