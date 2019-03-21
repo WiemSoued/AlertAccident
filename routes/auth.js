@@ -8,15 +8,34 @@ const router = express.Router();
 
 router.post("/Login", async (req, res) => {
   const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error)
+    return res.status(400).send({
+      status: "400",
+      message: "Erreur de validation...",
+      errors
+    });
+
+  if (!error)
+    return res.status(200).send({
+      status: "200",
+      message: "Opération effectuée avec succées.."
+    });
 
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send(`Email invalide ...`);
+  if (!user)
+    return res.status(400).send({
+      status: "400",
+      message: "Email invalide..."
+    });
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);
   console.log(req.body.password);
   console.log(user.password);
-  if (!validPassword) return res.status(400).send(`Mot de passe invalide ...`);
+  if (!validPassword)
+    return res.status(400).send({
+      status: "400",
+      message: "Mot de passe invalide..."
+    });
 
   res.send("Connecter avec sucées ...");
   const token = user.generateAuthToken();

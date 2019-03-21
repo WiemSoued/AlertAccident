@@ -57,7 +57,7 @@ router.get("/GetByCIN/:CIN", async (req, res) => {
       user: user
     });
   if (!user)
-    return res.send({
+    return res.status(400).send({
       status: "400",
       message: "Aucun utilisateur trouvée..."
     });
@@ -67,7 +67,8 @@ router.get("/GetByCIN/:CIN", async (req, res) => {
 });
 
 // /////////////////////////// POST DATA WITH HASHED PASSWORD ////////////////
-router.post("/Post/", validator.checkCreateUser, async (req, res) => {
+//router.post("/Post/", validator.checkCreateUser, async (req, res) => {
+router.post("/Post/", async (req, res) => {
   req
     .checkBody("nom")
     .not()
@@ -144,29 +145,22 @@ router.post("/Post/", validator.checkCreateUser, async (req, res) => {
       .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
       .withMessage(`Agence d'assurance invalide`);
 
-  console.log("posting ...");
   var errors = req.validationErrors();
-  errors = errors.map(error => {
-    return {
-      param: error.param,
-      msg: error.msg,
-      value: error.value
-    };
-  });
-
-  // errors =
-  //   errors[
-  //     error => {
-  //       return {
-  //         param: error.param,
-  //         msg: error.msg,
-  //         value: error.value
-  //       };
-  //     }
-  //   ];
-  console.log("Error log : ", errors);
-
-  if (errors) return res.status(400).send(errors);
+  
+  if (errors) {
+    errors = errors.map(error => {
+      return {
+        param: error.param,
+        msg: error.msg,
+        value: error.value
+      };
+    });
+    return res.status(400).send({
+      status: "400",
+      message: "Erreur de validation...",
+      errors
+    });
+  }
 
   let user = await User.findOne({ email: req.body.email });
   if (user) return res.status(400).send("Vous ete déjà enregistrer...");
@@ -189,7 +183,12 @@ router.post("/Post/", validator.checkCreateUser, async (req, res) => {
   user.password = await bcrypt.hash(user.password, salt);
 
   await user.save();
-  res.send(user);
+
+  if (!errors)
+    return res.status(200).send({
+      status: "200",
+      user
+    });
   console.log(user);
 });
 
