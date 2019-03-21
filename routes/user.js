@@ -7,15 +7,16 @@ const validate = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
-
 const bodyParser = require("body-parser");
 var expressValidator = require("express-validator");
 const { check } = require("express-validator/check");
+const boom = require("boom");
+const validator = require("../validators/user");
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(expressValidator());
 
 ///////////////// GET ALL DATA ////////////////////////////
-router.get("/", async (req, res) => {
+router.get("/GetAll", async (req, res) => {
   const users = await User.find().sort("nom");
   if (users)
     res.send({
@@ -29,7 +30,7 @@ router.get("/", async (req, res) => {
 });
 
 //////////////// GET DATA BY ID /////////////////////
-router.get("/:id", async (req, res) => {
+router.get("/GetById/:id", async (req, res) => {
   const user = await User.findById(req.params.id);
   if (user)
     res.send({
@@ -47,111 +48,37 @@ router.get("/:id", async (req, res) => {
 
 //////////////// GET DATA BY CIN /////////////////////
 
-console.log("procedding ...");
-router.get("/CIN/:CIN", async (req, res) => {
+router.get("/GetByCIN/:CIN", async (req, res) => {
   const user = await User.findOne(req.params.CIN);
-  if (!user) return res.status(404).send("Erreur : Identifiant introuvable...");
+  if (user)
+    res.send({
+      status: "200",
+      message: "Opération efectuée avec sucée...",
+      user: user
+    });
+  if (!user)
+    return res.send({
+      status: "400",
+      message: "Aucun utilisateur trouvée..."
+    });
   res.send(user);
   console.log(user);
   console.log(req.params.CIN);
 });
 
 // /////////////////////////// POST DATA WITH HASHED PASSWORD ////////////////
-router.post(
-  "/",
-  // [
-  //   check("nom")
-  //     .not()
-  //     .isEmpty()
-  //     .withMessage("Champ obligatoire")
-  //     .isAlpha()
-  //     .withMessage("Nom doit être une chaine des caractéres")
-  //     .isLength({ min: 3 }, { max: 50 })
-  //     .withMessage("Longeur de champ invalide "),
-
-  //   check("prenom")
-  //     .not()
-  //     .isEmpty()
-  //     .withMessage("Champ obligatoire")
-  //     .isAlpha()
-  //     .withMessage("Prénom doit être une chaine des caractéres")
-  //     .isLength({ min: 3, max: 70 })
-  //     .withMessage("Longeur de champ invalide"),
-
-  //   check("CIN")
-  //     .not()
-  //     .isEmpty()
-  //     .withMessage("Champ obligatoire")
-  //     .isAlphanumeric()
-  //     .withMessage("CIN doit être une suite des nombres")
-  //     .isLength({ min: 8, max: 8 })
-  //     .withMessage("Longeur du CIN doit être égale à 8"),
-
-  //   check("email")
-  //     .not()
-  //     .isEmpty()
-  //     .withMessage("Champ obligatoire")
-  //     .isEmail()
-  //     .withMessage("Format de email non respectée"),
-
-  //   check("adresse")
-  //     .isAlpha()
-  //     .withMessage("Adresse doit être une chaine des caractéres")
-  //     .isLength({ min: 3, max: 100 })
-  //     .withMessage(`Longeur d'adresse invalide`),
-
-  //   check("telephone")
-  //     .isAlphanumeric()
-  //     .withMessage("Telephone doit être une suite des nombres")
-  //     .isLength({ min: 5, max: 20 })
-  //     .withMessage(`Longeur du telephone invalide`),
-
-  //   check("permis")
-  //     .isAlphanumeric()
-  //     .withMessage("Chaine invalide")
-  //     .isLength({ min: 3, max: 30 })
-  //     .withMessage(`Longeur du permis invalide`),
-
-  //   // check("password")
-  //   //   .not()
-  //   //   .isEmpty()
-  //   //   .withMessage("Champ obligatoire")
-  //   //   .isAlphanumeric()
-  //   //   .withMessage("Chaine invalide")
-  //   //   .isLength({ min: 3, max: 255 })
-  //   //   .withMessage(`Longeur du mot de passe invalide`),
-
-  //   check("nomUser")
-  //     .not()
-  //     .isEmpty()
-  //     .withMessage("Champ obligatoire")
-  //     .isAlphanumeric()
-  //     .withMessage("Chaine invalide")
-  //     .isLength({ min: 3, max: 50 })
-  //     .withMessage(`Longeur du nom d'ultisateur invalide`),
-
-  //   check("agenceAssurance")
-  //     .isAlphanumeric()
-  //     .withMessage("Chaine invalide")
-  //     .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
-  //     .withMessage(`Agence d'assurance invalide`)
-  // ],
-  async (req, res) => {
-    console.log("req", req.body);
-
-    req.checkBody("nom", "name is required").notEmpty();
-    console.log("checking...");
+router.post("/Post/", validator.checkCreateUser, async (req, res) => {
+  req
+    .checkBody("nom")
+    .not()
+    .isEmpty()
+    .withMessage("Champ obligatoire")
+    .isAlpha()
+    .withMessage("Nom doit être une chaine des caractéres")
+    .isLength({ min: 3 }, { max: 50 })
+    .withMessage("Longeur de champ invalide "),
     req
-      .checkBody(req.body.nom)
-      .not()
-      .isEmpty()
-      .withMessage("Champ obligatoire")
-      .isAlpha()
-      .withMessage("Nom doit être une chaine des caractéres")
-      .isLength({ min: 3 }, { max: 50 })
-      .withMessage("Longeur de champ invalide "),
-      console.log("finishing...");
-    check("prenom")
+      .checkBody("prenom")
       .not()
       .isEmpty()
       .withMessage("Champ obligatoire")
@@ -159,91 +86,112 @@ router.post(
       .withMessage("Prénom doit être une chaine des caractéres")
       .isLength({ min: 3, max: 70 })
       .withMessage("Longeur de champ invalide"),
-      check("CIN")
-        .not()
-        .isEmpty()
-        .withMessage("Champ obligatoire")
-        .isAlphanumeric()
-        .withMessage("CIN doit être une suite des nombres")
-        .isLength({ min: 8, max: 8 })
-        .withMessage("Longeur du CIN doit être égale à 8"),
-      check("email")
-        .not()
-        .isEmpty()
-        .withMessage("Champ obligatoire")
-        .isEmail()
-        .withMessage("Format de email non respectée"),
-      check("adresse")
-        .isAlpha()
-        .withMessage("Adresse doit être une chaine des caractéres")
-        .isLength({ min: 3, max: 100 })
-        .withMessage(`Longeur d'adresse invalide`),
-      check("telephone")
-        .isAlphanumeric()
-        .withMessage("Telephone doit être une suite des nombres")
-        .isLength({ min: 5, max: 20 })
-        .withMessage(`Longeur du telephone invalide`),
-      check("permis")
-        .isAlphanumeric()
-        .withMessage("Chaine invalide")
-        .isLength({ min: 3, max: 30 })
-        .withMessage(`Longeur du permis invalide`),
-      // check("password")
-      //   .not()
-      //   .isEmpty()
-      //   .withMessage("Champ obligatoire")
-      //   .isAlphanumeric()
-      //   .withMessage("Chaine invalide")
-      //   .isLength({ min: 3, max: 255 })
-      //   .withMessage(`Longeur du mot de passe invalide`),
+    req
+      .checkBody("CIN")
+      .not()
+      .isEmpty()
+      .withMessage("Champ obligatoire")
+      .isAlphanumeric()
+      .withMessage("CIN doit être une suite des nombres")
+      .isLength({ min: 8, max: 8 })
+      .withMessage("Longeur du CIN doit être égale à 8"),
+    req
+      .checkBody("email")
+      .not()
+      .isEmpty()
+      .withMessage("Champ obligatoire")
+      .isEmail()
+      .withMessage("Format de email non respectée"),
+    req.checkBody("adresse");
+  // .isAlpha()
+  // .withMessage("Adresse doit être une chaine des caractéres")
+  // .isLength({ min: 3, max: 100 })
+  // .withMessage(`Longeur d'adresse invalide`),
+  req
+    .checkBody("telephone")
+    .isAlphanumeric()
+    .withMessage("Telephone doit être une suite des nombres")
+    .isLength({ min: 5, max: 20 })
+    .withMessage(`Longeur du telephone invalide`),
+    req
+      .checkBody("permis")
+      .isAlphanumeric()
+      .withMessage("Chaine invalide")
+      .isLength({ min: 3, max: 30 })
+      .withMessage(`Longeur du permis invalide`),
+    req
+      .checkBody("password")
+      .not()
+      .isEmpty()
+      .withMessage("Champ obligatoire")
+      .isAlphanumeric()
+      .withMessage("Chaine invalide")
+      .isLength({ min: 3, max: 255 })
+      .withMessage(`Longeur du mot de passe invalide`),
+    req
+      .checkBody("nomUser")
+      .not()
+      .isEmpty()
+      .withMessage("Champ obligatoire")
+      .isAlphanumeric()
+      .withMessage("Chaine invalide")
+      .isLength({ min: 3, max: 50 })
+      .withMessage(`Longeur du nom d'ultisateur invalide`),
+    req
+      .checkBody("agenceAssurance")
+      .isAlphanumeric()
+      .withMessage("Chaine invalide")
+      .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
+      .withMessage(`Agence d'assurance invalide`);
 
-      check("nomUser")
-        .not()
-        .isEmpty()
-        .withMessage("Champ obligatoire")
-        .isAlphanumeric()
-        .withMessage("Chaine invalide")
-        .isLength({ min: 3, max: 50 })
-        .withMessage(`Longeur du nom d'ultisateur invalide`),
-      check("agenceAssurance")
-        .isAlphanumeric()
-        .withMessage("Chaine invalide")
-        .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
-        .withMessage(`Agence d'assurance invalide`);
+  console.log("posting ...");
+  var errors = req.validationErrors();
+  errors = errors.map(error => {
+    return {
+      param: error.param,
+      msg: error.msg,
+      value: error.value
+    };
+  });
 
-    console.log("posting ...");
-    const nom = req.body.nom;
-    req.check(nom, "xxxxxxxxxxxxx").notEmpty();
-    // const  error  = req.checkBody("nom", "nom is required.").notEmpty();
-    console.log("err", req.checkBody(nom, "nom is required...").notEmpty());
+  // errors =
+  //   errors[
+  //     error => {
+  //       return {
+  //         param: error.param,
+  //         msg: error.msg,
+  //         value: error.value
+  //       };
+  //     }
+  //   ];
+  console.log("Error log : ", errors);
 
-    if (error) return res.status(400).send(error.details[0].message);
+  if (errors) return res.status(400).send(errors);
 
-    let user = await User.findOne({ email: req.body.email });
-    if (user) return res.status(400).send("Vous ete déjà enregistrer...");
+  let user = await User.findOne({ email: req.body.email });
+  if (user) return res.status(400).send("Vous ete déjà enregistrer...");
 
-    user = new User(
-      _.pick(req.body, [
-        "nom",
-        "CIN",
-        "prenom",
-        "email",
-        "adress",
-        "telephone",
-        "permis",
-        "password",
-        "nomUser",
-        "agenceAssurance"
-      ])
-    );
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
+  user = new User(
+    _.pick(req.body, [
+      "nom",
+      "CIN",
+      "prenom",
+      "email",
+      "adress",
+      "telephone",
+      "permis",
+      "password",
+      "nomUser",
+      "agenceAssurance"
+    ])
+  );
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(user.password, salt);
 
-    await user.save();
-    res.send(user);
-    console.log(user);
-  }
-);
+  await user.save();
+  res.send(user);
+  console.log(user);
+});
 
 // const token = user.generateAuthToken();
 // res
@@ -252,7 +200,7 @@ router.post(
 // });
 
 ///////////////////////////// DELETE DATA BY ID //////////////////////////
-router.delete("/:id", async (req, res) => {
+router.delete("/Delete/:id", async (req, res) => {
   const user = await User.findByIdAndDelete(req.params.id);
   if (!user)
     return res

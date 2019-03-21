@@ -1,4 +1,5 @@
 const express = require("express");
+const boom = require("express-boom");
 const app = express();
 const expressOasGenerator = require("express-oas-generator");
 const mongoose = require("mongoose");
@@ -21,17 +22,19 @@ if (!config.get("jwtPrivateKey")) {
   process.exit(1);
 }
 /////////////////////// CONNEXION ////////////////////////////////////
+mongoose.set("useCreateIndex", true);
 mongoose
-  .connect("mongodb://localhost/alertAccident")
+  .connect("mongodb://localhost/alertAccident", { useNewUrlParser: true })
   .then(() => console.log("Connected to MongoDB succefuly ..."))
   .catch(err => console.error("Failed to connect to MongoDB..."));
 
 app.use(express.json());
+app.use(boom());
 app.use(bodyParser.json());
 app.use(expressValidator());
-app.use("/api/user", user);
+app.use("/user", user);
 app.use("/api/admin", admin);
-app.use("/api/auth", auth);
+app.use("/auth", auth);
 
 /////////////////// PORT CONFIGURATION ////////////////////////
 const port = process.env.PORT || 3000;

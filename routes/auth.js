@@ -6,17 +6,19 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/Login", async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send(`Nom d'utlisateur invalide...`);
+  if (!user) return res.status(400).send(`Email invalide ...`);
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword)
-    return res.status(400).send(`Nom d'utlisateur invalide...PASSWORD`);
+  console.log(req.body.password);
+  console.log(user.password);
+  if (!validPassword) return res.status(400).send(`Mot de passe invalide ...`);
 
+  res.send("Connecter avec sucées ...");
   const token = user.generateAuthToken();
   res.send(token);
 
