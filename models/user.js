@@ -1,6 +1,5 @@
 //const Joi = require("joi");
 const mongoose = require("mongoose");
-//const Adress = require("./adress");
 const jwt = require("jsonwebtoken");
 const config = require("config");
 const _ = require("lodash");
@@ -73,8 +72,9 @@ const userSchema = new mongoose.Schema({
     enum: ["GAT", "STAR", "COMAR", "Maghrebia", "AMI"],
     // default: "STAR",
     required: false
-  }
+  },
   // INSERT PHOTO
+  isArchived: Boolean
 });
 
 // userSchema.methods.generateAuthToken = function() {

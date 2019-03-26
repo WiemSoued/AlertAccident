@@ -1,23 +1,16 @@
 const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
 const router = express.Router();
 const User = require("../models/user");
-const validate = require("../models/user");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const _ = require("lodash");
 const bodyParser = require("body-parser");
 var expressValidator = require("express-validator");
-const { check } = require("express-validator/check");
-const boom = require("boom");
-const validator = require("../validators/user");
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(expressValidator());
 
 ///////////////// GET ALL DATA ////////////////////////////
 router.get("/GetAll", async (req, res) => {
-  const users = await User.find().sort("nom");
+  const users = await User.find();
   if (users)
     res.send({
       status: "200",
@@ -29,7 +22,10 @@ router.get("/GetAll", async (req, res) => {
     res.send({ status: "400", message: "Aucun utilisateur trouvée..." });
 });
 
-//////////////// GET DATA BY ID /////////////////////
+//////////////////////// GET ARCHIVED DATA ///////////
+
+
+//////////////// GET DATA BY ID //////////////////////
 router.get("/GetById/:id", async (req, res) => {
   const user = await User.findById(req.params.id);
   if (user)
@@ -67,7 +63,6 @@ router.get("/GetByCIN/:CIN", async (req, res) => {
 });
 
 // /////////////////////////// POST DATA WITH HASHED PASSWORD ////////////////
-//router.post("/Post/", validator.checkCreateUser, async (req, res) => {
 router.post("/Post/", async (req, res) => {
   req
     .checkBody("nom")
@@ -146,7 +141,7 @@ router.post("/Post/", async (req, res) => {
       .withMessage(`Agence d'assurance invalide`);
 
   var errors = req.validationErrors();
-  
+
   if (errors) {
     errors = errors.map(error => {
       return {
@@ -187,7 +182,8 @@ router.post("/Post/", async (req, res) => {
   if (!errors)
     return res.status(200).send({
       status: "200",
-      user
+      message: "Opération efectuée avec sucées...",
+      data: user
     });
   console.log(user);
 });
@@ -199,15 +195,27 @@ router.post("/Post/", async (req, res) => {
 // });
 
 ///////////////////////////// DELETE DATA BY ID //////////////////////////
-router.delete("/Delete/:id", async (req, res) => {
-  const user = await User.findByIdAndDelete(req.params.id);
+// router.delete("/Delete/:id", async (req, res) => {
+//   const user = await User.findByIdAndDelete(req.params.id);
+//   if (!user)
+//     return res
+//       .status(404)
+//       .send("Erreur lors de la suppression : Identiant introuvable ...");
+//   res.send(user);
+//   console.log("deleted with succes ...");
+// });
+
+
+/////////////////////  ARCHIVE USER //////////////////////////////
+router.post("/delete/:id", async (req,res)=>{
+  const user = await User.findById(req.body.id) ;
   if (!user)
-    return res
-      .status(404)
-      .send("Erreur lors de la suppression : Identiant introuvable ...");
-  res.send(user);
-  console.log("deleted with succes ...");
-});
+  return res
+    .status(404)
+    .send("Erreur lors de la suppression : Identiant introuvable ...");
+  else 
+  user.isArchived = false ; 
+})
 
 /////////////////////// LOG OUT METHODE ////////////////////////////
 
@@ -220,13 +228,14 @@ router.delete("/Delete/:id", async (req, res) => {
 //         return next(err);
 //       }
 //       // The response should indicate that the user is no longer authenticated.
-//       return res.send({ authenticated: req.isAuthenticated() });
+//       console.log("logging out ...");
+//       return res.send({ authenticated: req.isAuthenticated() }, "uyuy");
 //       console.log("termenating the log out process ...");
 //     });
 //   };
 // });
 
-// router.get("/", function(req, res) {
+// router.get("/l", function(req, res) {
 //   function logout(req, res) {
 //     delete req.session;
 //     console.log("loggin into the methde...");
@@ -239,5 +248,3 @@ router.delete("/Delete/:id", async (req, res) => {
 //   }
 // });
 module.exports = router;
-
-////////////////////////////// VALIDATOR IMAGE MESSAGE ERREUR RETOUR DE DONNEE//////
