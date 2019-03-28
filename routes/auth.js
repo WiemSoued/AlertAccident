@@ -15,17 +15,18 @@ router.post("/Login", async (req, res) => {
       errors
     });
 
-  if (!error)
-    return res.status(200).send({
-      status: "200",
-      message: "Opération effectuée avec succées.."
-    });
-
   const user = await User.findOne({ email: req.body.email });
   if (!user)
     return res.status(400).send({
       status: "400",
       message: "Email invalide..."
+    });
+
+  if (!error)
+    return res.status(200).send({
+      status: "200",
+      message: "Opération effectuée avec succées..",
+      data: user
     });
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);

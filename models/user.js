@@ -9,32 +9,32 @@ const userSchema = new mongoose.Schema({
   CIN: {
     //type: $or[objectId,String],
     type: String,
-    required: true,
+    required: false,
     length: 8,
     unique: true
   },
   nom: {
     type: String,
-    required: true,
+    required: false,
     minlength: 3,
     maxlength: 50
   },
   prenom: {
     type: String,
-    required: true,
+    required: false,
     minlength: 3,
     maxlength: 70
   },
   email: {
     type: String,
-    required: true,
+    required: false,
     minlength: 10,
     maxlength: 50,
     unique: true
   },
   adress: {
     type: String,
-    required: true,
+    required: false,
     minlength: 3,
     maxlength: 100
   },
@@ -52,21 +52,22 @@ const userSchema = new mongoose.Schema({
   },
   permis: {
     type: String,
-    required: true,
+    required: false,
     minlength: 3,
     maxlength: 30
   },
   password: {
     type: String,
-    required: true,
+    required: false,
     minlength: 3,
     maxlength: 255
   },
   nomUser: {
     type: String,
-    required: true,
+    required: false,
     minlength: 3,
-    maxlength: 50
+    maxlength: 50,
+    unique: true
   },
   agenceAssurance: {
     enum: ["GAT", "STAR", "COMAR", "Maghrebia", "AMI"],

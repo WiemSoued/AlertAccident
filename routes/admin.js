@@ -36,4 +36,30 @@ router.delete("/:id", async (req, res) => {
   console.log("deleted with succes ...");
 });
 
+///////////////////// UPDATE ADMIN ////////////////////////////////
+
+router.put("/update/:nom", (req, res) => {
+  const { error } = {};
+  if (error) return res.status(400).send(error.details[0].message);
+  if (!req.params.nom) {
+    console.log("nom invalide");
+    res.send("Nom invalide");
+  }
+
+  const user = User.findOneAndUpdate(
+    { nom: req.params.nom },
+    {
+      nom: req.body.nom,
+      prenom: req.body.prenom,
+      email: req.body.email,
+      password: req.body.password,
+      nomUser: req.body.nomUser
+    }
+  ).then(resp => {
+    res.json(resp);
+  });
+  console.log("updating ...");
+  console.log(user);
+});
+
 module.exports = router;

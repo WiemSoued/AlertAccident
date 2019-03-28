@@ -24,7 +24,6 @@ router.get("/GetAll", async (req, res) => {
 
 //////////////////////// GET ARCHIVED DATA ///////////
 
-
 //////////////// GET DATA BY ID //////////////////////
 router.get("/GetById/:id", async (req, res) => {
   const user = await User.findById(req.params.id);
@@ -64,81 +63,73 @@ router.get("/GetByCIN/:CIN", async (req, res) => {
 
 // /////////////////////////// POST DATA WITH HASHED PASSWORD ////////////////
 router.post("/Post/", async (req, res) => {
-  req
-    .checkBody("nom")
-    .not()
-    .isEmpty()
-    .withMessage("Champ obligatoire")
-    .isAlpha()
-    .withMessage("Nom doit être une chaine des caractéres")
-    .isLength({ min: 3 }, { max: 50 })
-    .withMessage("Longeur de champ invalide "),
-    req
-      .checkBody("prenom")
-      .not()
-      .isEmpty()
-      .withMessage("Champ obligatoire")
-      .isAlpha()
-      .withMessage("Prénom doit être une chaine des caractéres")
-      .isLength({ min: 3, max: 70 })
-      .withMessage("Longeur de champ invalide"),
-    req
-      .checkBody("CIN")
-      .not()
-      .isEmpty()
-      .withMessage("Champ obligatoire")
-      .isAlphanumeric()
-      .withMessage("CIN doit être une suite des nombres")
-      .isLength({ min: 8, max: 8 })
-      .withMessage("Longeur du CIN doit être égale à 8"),
-    req
-      .checkBody("email")
-      .not()
-      .isEmpty()
-      .withMessage("Champ obligatoire")
-      .isEmail()
-      .withMessage("Format de email non respectée"),
-    req.checkBody("adresse");
+  req.checkBody("nom");
+  // .not()
+  // .isEmpty()
+  // .withMessage("Champ obligatoire")
+  // .isAlpha()
+  // .withMessage("Nom doit être une chaine des caractéres")
+  // .isLength({ min: 3 }, { max: 50 })
+  // .withMessage("Longeur de champ invalide "),
+  req.checkBody("prenom");
+  // .not()
+  // .isEmpty()
+  // .withMessage("Champ obligatoire")
+  // .isAlpha()
+  // .withMessage("Prénom doit être une chaine des caractéres")
+  // .isLength({ min: 3, max: 70 })
+  // .withMessage("Longeur de champ invalide"),
+  req.checkBody("CIN");
+  // .not()
+  // .isEmpty()
+  // .withMessage("Champ obligatoire")
+  // .isAlphanumeric()
+  // .withMessage("CIN doit être une suite des nombres")
+  // .isLength({ min: 8, max: 8 })
+  // .withMessage("Longeur du CIN doit être égale à 8"),
+  req.checkBody("email");
+  // .not()
+  // .isEmpty()
+  // .withMessage("Champ obligatoire")
+  //   .isEmail()
+  //   .withMessage("Format de email non respectée"),
+  // req.checkBody("adresse");
   // .isAlpha()
   // .withMessage("Adresse doit être une chaine des caractéres")
   // .isLength({ min: 3, max: 100 })
   // .withMessage(`Longeur d'adresse invalide`),
+  req.checkBody("telephone");
+  // .isAlphanumeric()
+  // .withMessage("Telephone doit être une suite des nombres")
+  // .isLength({ min: 5, max: 20 })
+  // .withMessage(`Longeur du telephone invalide`),
+  req.checkBody("permis");
+  // .isAlphanumeric()
+  // .withMessage("Chaine invalide")
+  // .isLength({ min: 3, max: 30 })
+  // .withMessage(`Longeur du permis invalide`),
   req
-    .checkBody("telephone")
-    .isAlphanumeric()
-    .withMessage("Telephone doit être une suite des nombres")
-    .isLength({ min: 5, max: 20 })
-    .withMessage(`Longeur du telephone invalide`),
-    req
-      .checkBody("permis")
-      .isAlphanumeric()
-      .withMessage("Chaine invalide")
-      .isLength({ min: 3, max: 30 })
-      .withMessage(`Longeur du permis invalide`),
-    req
-      .checkBody("password")
-      .not()
-      .isEmpty()
-      .withMessage("Champ obligatoire")
-      .isAlphanumeric()
-      .withMessage("Chaine invalide")
-      .isLength({ min: 3, max: 255 })
-      .withMessage(`Longeur du mot de passe invalide`),
-    req
-      .checkBody("nomUser")
-      .not()
-      .isEmpty()
-      .withMessage("Champ obligatoire")
-      .isAlphanumeric()
-      .withMessage("Chaine invalide")
-      .isLength({ min: 3, max: 50 })
-      .withMessage(`Longeur du nom d'ultisateur invalide`),
-    req
-      .checkBody("agenceAssurance")
-      .isAlphanumeric()
-      .withMessage("Chaine invalide")
-      .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
-      .withMessage(`Agence d'assurance invalide`);
+    .checkBody("password")
+    .not()
+    .isEmpty()
+    .withMessage("Champ obligatoire")
+    // .isAlphanumeric()
+    // .withMessage("Chaine invalide")
+    .isLength({ min: 3, max: 255 })
+    .withMessage(`Longeur du mot de passe invalide`),
+    req.checkBody("nomUser");
+  // .not()
+  // .isEmpty()
+  // .withMessage("Champ obligatoire")
+  // .isAlphanumeric()
+  // .withMessage("Chaine invalide")
+  // .isLength({ min: 3, max: 50 })
+  // .withMessage(`Longeur du nom d'ultisateur invalide`),
+  req.checkBody("agenceAssurance");
+  // .isAlphanumeric()
+  // .withMessage("Chaine invalide")
+  // .equals("GAT", "STAR", "COMAR", "Maghrebia", "AMI")
+  // .withMessage(`Agence d'assurance invalide`);
 
   var errors = req.validationErrors();
 
@@ -205,17 +196,15 @@ router.post("/Post/", async (req, res) => {
 //   console.log("deleted with succes ...");
 // });
 
-
 /////////////////////  ARCHIVE USER //////////////////////////////
-router.post("/delete/:id", async (req,res)=>{
-  const user = await User.findById(req.body.id) ;
+router.post("/delete/:id", async (req, res) => {
+  const user = await User.findById(req.body.id);
   if (!user)
-  return res
-    .status(404)
-    .send("Erreur lors de la suppression : Identiant introuvable ...");
-  else 
-  user.isArchived = false ; 
-})
+    return res
+      .status(404)
+      .send("Erreur lors de la suppression : Identiant introuvable ...");
+  else user.isArchived = false;
+});
 
 /////////////////////// LOG OUT METHODE ////////////////////////////
 
@@ -247,4 +236,49 @@ router.post("/delete/:id", async (req,res)=>{
 //     return logout();
 //   }
 // });
+
+///////////////////// UPDATE USER ////////////////////////////////
+
+router.put("/update/:nom", (req, res) => {
+  console.log(req.params);
+  const { error } = {};
+  if (error) return res.status(400).send(error.details[0].message);
+  if (!req.params.nom) {
+    console.log("nom invalide");
+    res.send("Nom invalide");
+  }
+  const user = User.findOneAndUpdate(
+    { nom: req.params.nom },
+    {
+      CIN: req.body.CIN,
+      nom: req.body.nom,
+      prenom: req.body.prenom,
+      email: req.body.email,
+      adress: req.body.adress,
+      telephone: req.body.telephone,
+      permis: req.body.permis,
+      password: req.body.password,
+      nomUser: req.body.nomUser,
+      agenceAssurance: req.body.agenceAssurance
+    }
+  );
+
+  if (!user)
+    return res.status(400).send({
+      status: "400",
+      message: "Error..."
+    });
+  console.log("updating ...");
+  if (user)
+    return res.status(200).send({
+      status: "200",
+      message: "Opération effectuée avec succée...",
+      data: user
+    });
+  // .then(resp => {
+  //   res.json(resp);
+  // })
+  // .catch(err => console.log(err));
+  console.log(user);
+});
 module.exports = router;
